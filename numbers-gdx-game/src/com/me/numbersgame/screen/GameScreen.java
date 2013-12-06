@@ -16,14 +16,21 @@ import com.me.numbersgame.NumbersGame;
 import com.me.numbersgame.Number;
 
 public class GameScreen implements Screen, InputProcessor {
-
+	
+	public static enum Rule {
+		ODD_SUM, ODD_PRODUCT, EVEN_SUM, EVEN_PRODUCT
+	}
+	
 	public static SpriteBatch spriteBatch;
 	private Texture texture;
 	private Sprite sprite[][], spriteSelected[][];
+	private Sprite sprOddSum, sprOddProduct, sprEvenSum, sprEvenProduct;
 	private OrthographicCamera camera;
 	NumbersGame game;
 	private ArrayList<Number> selectedNumbers = new ArrayList<Number>();
 	private Number numbers[][];
+	
+	private Rule rule;
 	
 	// location of the numbers
 	int locX = 65, locY = 50;
@@ -31,6 +38,7 @@ public class GameScreen implements Screen, InputProcessor {
 	public GameScreen(NumbersGame game) {
 		this.game = game;
 		
+		rule = Rule.ODD_SUM;
 		
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		// the origin for drawing is at bottom left, this flips it to upper left to be used by spriteBatch
@@ -44,9 +52,25 @@ public class GameScreen implements Screen, InputProcessor {
 				numbers[j][i] = NumberResources.randomNumber();
 				numbers[j][i].setJ(j);
 				numbers[j][i].setI(i);
-				
 			}
 		}
+		
+		sprOddSum = new Sprite(new Texture(NumberResources.oddSum));
+		sprEvenSum = new Sprite(new Texture(NumberResources.evenSum));
+		sprOddProduct = new Sprite(new Texture(NumberResources.oddProduct));
+		sprEvenProduct = new Sprite(new Texture(NumberResources.evenProduct));
+		
+		int productLocX = 100, LocY = 430;
+		int sumLocX = 110;
+		sprOddSum.setBounds(sumLocX, LocY, 280, 60);
+		sprEvenSum.setBounds(sumLocX, LocY, 280, 60);
+		sprOddProduct.setBounds(productLocX, LocY, 280, 60);
+		sprEvenProduct.setBounds(productLocX, LocY, 280, 60);
+		
+		sprOddSum.flip(false, true);
+		sprEvenSum.flip(false, true);
+		sprOddProduct.flip(false, true);
+		sprEvenProduct.flip(false, true);
 		
 		sprite = new Sprite[4][4];
 		spriteSelected = new Sprite[4][4];
@@ -72,7 +96,6 @@ public class GameScreen implements Screen, InputProcessor {
 		// sprite batch will use the camera
 		spriteBatch.setProjectionMatrix(camera.combined);
 		
-		
 		//sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
 	}
 	
@@ -89,6 +112,11 @@ public class GameScreen implements Screen, InputProcessor {
 				else
 					sprite[j][i].draw(spriteBatch);
 			}
+		
+		//sprOddSum.draw(spriteBatch);
+		//sprEvenSum.draw(spriteBatch);
+		sprOddProduct.draw(spriteBatch);
+		//sprEvenProduct.draw(spriteBatch);
 		
 		spriteBatch.end();
 	}
@@ -159,14 +187,16 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		for (int i = 0; i < numbers.length; i++) {
-			for (int j = 0; j < numbers[i].length; j++) {
-				//if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
-				//		&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight())
+		for (int i = 0; i < numbers.length; i++) 
+			for (int j = 0; j < numbers[i].length; j++) 
 					numbers[j][i].setSelected(false);
-					selectedNumbers.clear();
-			}
+		
+		
+		if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
+			// compute
 		}
+		selectedNumbers.clear();
+		
 		return false;
 	}
 

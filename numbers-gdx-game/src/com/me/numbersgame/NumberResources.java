@@ -26,6 +26,10 @@ public class NumberResources {
 	public static final String eightSelected = "img/eight2_selected.png";
 	public static final String nineSelected = "img/nine2_selected.png";
 	
+	public static final String oddSum = "img/oddSum.png";
+	public static final String oddProduct = "img/oddProduct.png";
+	public static final String evenSum = "img/evenSum.png";
+	public static final String evenProduct = "img/evenProduct.png";
 	
 	public static Number randomNumber() {
 		Random rand = new Random();
