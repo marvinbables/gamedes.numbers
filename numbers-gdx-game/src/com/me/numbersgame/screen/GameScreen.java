@@ -355,5 +355,30 @@ public class GameScreen implements Screen, InputProcessor {
 	public boolean scrolled(int amount) {
 		return false;
 	}
+	
+	public boolean checkProductOfEven(Number numbers[][]){
+		
+		for(int i = 0; i < numbers.length; i++){
+			for(int j = 0; j < numbers[i].length; j++){
+				if(numbers[i][j].getNumber() % 2 == 0)
+					return true;		
+			}
+			
+		}
+		return false;	
+	}
+	
+	public boolean checkProductOfOdd(Number numbers[][]){
+		
+		for(int i = 0; i < numbers.length; i++){
+			for(int j = 0; j < numbers[i].length; j++){
+				if(numbers[i][j].getNumber() % 2 == 1)
+					return true;		
+			}
+			
+		}
+		return false;	
+	}
+	
 
 }
