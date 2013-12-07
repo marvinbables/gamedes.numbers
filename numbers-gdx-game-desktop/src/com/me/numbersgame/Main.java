@@ -8,8 +8,9 @@ public class Main {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "Numbers";
 		cfg.useGL20 = false;
+		// 480, 580
 		cfg.width = 480;
-		cfg.height = 560;
+		cfg.height = 580;
 		
 		new LwjglApplication(new NumbersGame(), cfg);
 	}
