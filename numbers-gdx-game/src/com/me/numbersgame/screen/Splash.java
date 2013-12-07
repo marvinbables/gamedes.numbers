@@ -57,7 +57,7 @@ public class Splash implements Screen {
 		
 		Tween.set(spriteSplash, 0).target(0).start(tweenManager);
 		// previous duration 2
-		Tween.to(spriteSplash, 0, 0.2f).target(1).repeatYoyo(1, 0.2f).setCallback(new TweenCallback() {
+		Tween.to(spriteSplash, 0, 0.1f).target(1).repeatYoyo(1, 0.1f).setCallback(new TweenCallback() {
 			
 			@Override
 			public void onEvent(int type, BaseTween<?> source) {

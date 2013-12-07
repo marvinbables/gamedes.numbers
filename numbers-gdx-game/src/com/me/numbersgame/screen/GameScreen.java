@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -36,8 +37,13 @@ public class GameScreen implements Screen, InputProcessor {
 	private ArrayList<Number> selectedNumbers = new ArrayList<Number>();
 	private Number numbers[][];
 	
-	private BitmapFont lblRuleFont;
+	private BitmapFont lblRuleFont, lblScore, lblTime, lblCountdown, lblOperation;
 	private Rule rule;
+	private Color paleBlue = new Color(.45f, .54f, .73f, 1); // 120, 138, 188, 1; 
+	private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
+	
+	int time, readyCount;
+	String drawTime, operation;
 	
 	// location of the numbers
 	int locX = 65, locY = 100;
@@ -45,21 +51,38 @@ public class GameScreen implements Screen, InputProcessor {
 	public void loadFont() {
 		SCALE = 1.0f * Gdx.graphics.getWidth() / VIRTUAL_WIDTH ;
 
-	    if (SCALE<1)
+	    if (SCALE < 1)
 	        SCALE = 1;
 
 	    FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/GOTHIC.ttf"));
 
 	    //12 is the size i want to give for the font on all devices
 	    lblRuleFont = generator.generateFont((int) (28 * SCALE));
-	    
 	    //Aplly the inverse scale of what Libgdx will do
 	    lblRuleFont.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
-	    
-	    lblRuleFont.setColor(120, 138, 188, 1);
-	    
+	    lblRuleFont.setColor(paleBlue);
 	    //Apply Linear filtering; best choice to keep everything looking sharp
 	    lblRuleFont.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    
+	    lblScore = generator.generateFont((int) (20 * SCALE));
+	    lblScore.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblScore.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    //lblScore.setColor(royalBlue1);
+	    
+	    lblTime = generator.generateFont((int) (30 * SCALE));
+	    lblTime.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblTime.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    lblTime.setColor(paleBlue);
+	    
+	    lblCountdown = generator.generateFont((int) (150 * SCALE));
+	    lblCountdown.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblCountdown.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    //lblCountdown.setColor(paleBlue);
+	    
+	    lblOperation = generator.generateFont((int) (28 * SCALE));
+	    lblOperation.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblOperation.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    lblOperation.setColor(paleBlue);
 	    
 	    generator.dispose();
 	}
@@ -75,16 +98,7 @@ public class GameScreen implements Screen, InputProcessor {
 		// the origin for drawing is at bottom left, this flips it to upper left to be used by spriteBatch
 		camera.setToOrtho(true);  
 		
-		int spriteSize = 70;
 		
-		numbers = new Number[4][4];
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				numbers[j][i] = NumberResources.randomNumber();
-				numbers[j][i].setJ(j);
-				numbers[j][i].setI(i);
-			}
-		}
 		/*
 		sprOddSum = new Sprite(new Texture(NumberResources.oddSum));
 		sprEvenSum = new Sprite(new Texture(NumberResources.evenSum));
@@ -104,8 +118,30 @@ public class GameScreen implements Screen, InputProcessor {
 		sprOddProduct.flip(false, true);
 		sprEvenProduct.flip(false, true);
 		*/
+		numbers = new Number[4][4];
 		sprite = new Sprite[4][4];
 		spriteSelected = new Sprite[4][4];
+		
+		
+		spriteBatch = new SpriteBatch();
+		// sprite batch will use the camera
+		spriteBatch.setProjectionMatrix(camera.combined);
+		
+		//sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+	}
+	
+	private void initialize() {
+		int spriteSize = 70;
+		
+		
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				numbers[j][i] = NumberResources.randomNumber();
+				numbers[j][i].setJ(j);
+				numbers[j][i].setI(i);
+			}
+		}
+		
 		for (int i = 0; i < 4; i++) {
 			for(int j = 0; j < 4; j++) {
 				texture = new Texture(numbers[j][i].getFilePath());
@@ -124,18 +160,32 @@ public class GameScreen implements Screen, InputProcessor {
 			}
 		}
 		
-		spriteBatch = new SpriteBatch();
-		// sprite batch will use the camera
-		spriteBatch.setProjectionMatrix(camera.combined);
-		
-		//sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+		time = 60000;
+		drawTime = "60:00";
+		readyCount = 4000;
+		operation = "";
 	}
+	
 	
 	@Override
 	public void render(float delta) {
+		update(delta);
+		draw(delta);
+	}
+	
+	private void update(float delta) {
+		readyCount -= 15;
+		if(readyCount/1000 <= 0) {
+			time -= 15;
+			drawTime = (time/1000) + ":" + (time%1000)/10;
+		}
+		
+	}
+	int temp = 0;
+	private void draw(float delta) {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
+				
 		spriteBatch.begin();
 		for(int i = 0; i < 4; i++)
 			for(int j = 0; j < 4; j++) {
@@ -145,10 +195,17 @@ public class GameScreen implements Screen, InputProcessor {
 					sprite[j][i].draw(spriteBatch);
 			}
 		
-		
 		lblRuleFont.draw(spriteBatch, currentRule(rule), 
-				Gdx.graphics.getWidth()/2 - lblRuleFont.getBounds(currentRule(rule)).width/2, 380 + locY);
+				Gdx.graphics.getWidth()/2 - lblRuleFont.getBounds(currentRule(rule)).width/2, locY + 380);
 		
+		lblScore.draw(spriteBatch, "Score: 2314", locX, locY - 25); // locY - 25
+		lblTime.draw(spriteBatch, drawTime, Gdx.graphics.getWidth()/2 - lblTime.getBounds(drawTime).width/2, locY + 430);
+		if(readyCount/1000 > 0)
+			lblCountdown.draw(spriteBatch, (readyCount/1000)+"", 
+					Gdx.graphics.getWidth()/2 - lblCountdown.getBounds((readyCount/1000)+"").width/2, locY + 120);
+		
+		lblOperation.draw(spriteBatch, operation, 
+				Gdx.graphics.getWidth()/2 - lblOperation.getBounds(operation).width/2, locY - 70);
 		
 		spriteBatch.end();
 	}
@@ -171,6 +228,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public void show() {
 		Gdx.input.setInputProcessor(this);
+		initialize();
 	}
 
 	@Override
@@ -220,6 +278,7 @@ public class GameScreen implements Screen, InputProcessor {
 					selectedNumbers.add(numbers[j][i]);
 					numbers[j][i].setSelected(true);
 					
+					operation = numbers[j][i].getNumber() + "";
 					if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
 						rule = Rule.ODD_SUM;
 					else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
@@ -246,7 +305,7 @@ public class GameScreen implements Screen, InputProcessor {
 			// compute
 		}
 		selectedNumbers.clear();
-		
+		operation = "";
 		
 		return false;
 	}
@@ -270,6 +329,11 @@ public class GameScreen implements Screen, InputProcessor {
 									num.getJ() == numbers[j][i].getJ() && num.getI()+1 == numbers[j][i].getI()) {
 								selectedNumbers.add(numbers[j][i]);
 								numbers[j][i].setSelected(true);
+								
+								if(rule == Rule.EVEN_SUM || rule == Rule.ODD_SUM)
+									operation += " + " + numbers[j][i].getNumber();
+								else
+									operation += " x " + numbers[j][i].getNumber();
 							}
 
 						}
