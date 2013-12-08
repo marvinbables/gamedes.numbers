@@ -42,8 +42,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private Color paleBlue = new Color(.45f, .54f, .73f, 1); // 120, 138, 188, 1; 
 	private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
 	
-	int time, readyCount;
+	int time, readyCount, elapsedMs = 15, incorrectDelay = 1000, incorrectDelayTimer;
 	String drawTime, operation;
+	
+	boolean correct, startDelay;
 	
 	// location of the numbers
 	int locX = 65, locY = 100;
@@ -158,7 +160,6 @@ public class GameScreen implements Screen, InputProcessor {
 				spriteSelected[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_selected()));
 				spriteSelected[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
 				spriteSelected[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
-				
 			}
 		}
 		
@@ -166,6 +167,9 @@ public class GameScreen implements Screen, InputProcessor {
 		drawTime = "60:00";
 		readyCount = 4000;
 		operation = "";
+		correct = false;
+		incorrectDelayTimer = 0;
+		startDelay = false;
 	}
 	
 	
@@ -175,13 +179,43 @@ public class GameScreen implements Screen, InputProcessor {
 		draw(delta);
 	}
 	
+	
 	private void update(float delta) {
-		readyCount -= 15;
+		readyCount -= elapsedMs;
 		if(readyCount/1000 <= 0) {
-			time -= 15;
+			time -= elapsedMs;
 			if(time < 0)
 				time = 0;
 			drawTime = (time/1000) + ":" + (time%1000)/10;
+		}
+		// delay if input was incorrect
+		if(startDelay) {
+			incorrectDelayTimer += elapsedMs;
+			
+			if(incorrectDelayTimer >= 80 && incorrectDelayTimer <= 150) 
+				for (Number num : selectedNumbers)
+					num.setSelected(false);
+			
+			if(incorrectDelayTimer >= 200 && incorrectDelayTimer <= 270)
+				for (Number num : selectedNumbers)
+					num.setSelected(true);
+			
+			if(incorrectDelayTimer >= 320 && incorrectDelayTimer <= 390)
+				for (Number num : selectedNumbers)
+					num.setSelected(false);
+			
+			if(incorrectDelayTimer >= 440 && incorrectDelayTimer <= 510)
+				for (Number num : selectedNumbers)
+					num.setSelected(true);
+			
+			if(incorrectDelayTimer >= incorrectDelay) {
+				incorrectDelayTimer = 0;
+				startDelay = false;
+				for (Number num : selectedNumbers)
+					num.setSelected(false);
+				selectedNumbers.clear();
+				operation = "";
+			}
 		}
 		
 	}
@@ -275,7 +309,7 @@ public class GameScreen implements Screen, InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		//Gdx.app.log("", "x: " + screenX + " ; y: " + screenY);
 		
-		if(readyCount/1000 <= 0)
+		if(readyCount/1000 <= 0 && !startDelay) {
 			for (int i = 0; i < numbers.length; i++) {
 				for (int j = 0; j < numbers[i].length; j++) {
 					if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
@@ -295,7 +329,8 @@ public class GameScreen implements Screen, InputProcessor {
 					}
 				}
 			}
-		
+			
+		}
 		return false;
 	}
 	
@@ -303,7 +338,7 @@ public class GameScreen implements Screen, InputProcessor {
 		
 	}
 	
-	private void compute() {
+	private boolean checkIfCorrect() {
 		int sum = 0, product = 1;
 		for (Number num : selectedNumbers) {
 			sum += num.getNumber();
@@ -311,41 +346,51 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		switch(rule) {
 			case ODD_SUM: 
-				if(sum % 2 != 0) {
-					addPoints();
-				}
+				if(sum % 2 != 0) 
+					return true;
 				break;
 			case ODD_PRODUCT:
-				if(product % 2 != 0) {
-					addPoints();
-				}
+				if(product % 2 != 0) 
+					return true;
 				break;
 			case EVEN_SUM:
-				if(sum % 2 == 0) {
-					addPoints();
-				}
+				if(sum % 2 == 0) 
+					return true;
 				break;
 			case EVEN_PRODUCT:
-				if(product % 2 == 0) {
-					addPoints();
-				}
+				if(product % 2 == 0) 
+					return true;
 				break;
 		}
+		return false;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		for (int i = 0; i < numbers.length; i++) 
-			for (int j = 0; j < numbers[i].length; j++) 
-					numbers[j][i].setSelected(false);
-		
 		
 		if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
-			compute();
+			correct = checkIfCorrect(); 
+			if(correct) {
+				addPoints();
+				correct = false;
+				for (Number num : selectedNumbers)
+					num.setSelected(false);
+				selectedNumbers.clear();
+				operation = "";
+			}
+			else {
+				startDelay = true;
+			}
+		}
+		else if(selectedNumbers.size() != 0){
+			startDelay = true;
 		}
 		
-		selectedNumbers.clear();
-		operation = "";
+		//for (Number num : selectedNumbers)
+		//	num.setSelected(false);
+		
+		
+		
 		
 		return false;
 	}
@@ -353,7 +398,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		
-		if(readyCount/1000 <= 0)
+		if(readyCount/1000 <= 0 && !startDelay)
 			if(selectedNumbers.size() < 5)
 				for (int i = 0; i < numbers.length; i++) {
 					for (int j = 0; j < numbers[i].length; j++) {
