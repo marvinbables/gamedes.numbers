@@ -283,7 +283,7 @@ public class GameScreen implements Screen, InputProcessor {
 						selectedNumbers.add(numbers[j][i]);
 						numbers[j][i].setSelected(true);
 						
-						operation = numbers[j][i].getNumber() + "";
+						operation = operationToString();
 						if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
 							rule = Rule.ODD_SUM;
 						else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
@@ -372,10 +372,7 @@ public class GameScreen implements Screen, InputProcessor {
 										selectedNumbers.add(numbers[j][i]);
 										numbers[j][i].setSelected(true);
 										
-										if(rule == Rule.EVEN_SUM || rule == Rule.ODD_SUM)
-											operation += " + " + numbers[j][i].getNumber() ;
-										else
-											operation += " x " + numbers[j][i].getNumber();
+										operation = operationToString();
 									}
 								}
 							}
@@ -384,6 +381,23 @@ public class GameScreen implements Screen, InputProcessor {
 				}
 		
 		return false;
+	}
+	
+	private String operationToString() {
+		String operation = "";
+		
+		for (int i = 0; i < selectedNumbers.size(); i++) {
+			Number num = selectedNumbers.get(i);
+			if(rule == Rule.EVEN_SUM || rule == Rule.ODD_SUM)
+				operation += ((i == 0)? "" : " + ") + num.getNumber();
+			else
+				operation += ((i == 0)? "" : " x ") + num.getNumber();
+		}
+		
+		if(selectedNumbers.size() > 1)
+			operation += " = " + getResult();
+			
+		return operation;
 	}
 	
 	private int getResult() {
