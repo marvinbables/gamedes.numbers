@@ -131,8 +131,10 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 	
 	private void initialize() {
-		int spriteSize = 70;
+		if(texture != null)
+			texture.dispose();
 		
+		int spriteSize = 70;
 		
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
@@ -177,11 +179,13 @@ public class GameScreen implements Screen, InputProcessor {
 		readyCount -= 15;
 		if(readyCount/1000 <= 0) {
 			time -= 15;
+			if(time < 0)
+				time = 0;
 			drawTime = (time/1000) + ":" + (time%1000)/10;
 		}
 		
 	}
-	int temp = 0;
+
 	private void draw(float delta) {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -271,27 +275,62 @@ public class GameScreen implements Screen, InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		//Gdx.app.log("", "x: " + screenX + " ; y: " + screenY);
 		
-		for (int i = 0; i < numbers.length; i++) {
-			for (int j = 0; j < numbers[i].length; j++) {
-				if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
-						&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
-					selectedNumbers.add(numbers[j][i]);
-					numbers[j][i].setSelected(true);
-					
-					operation = numbers[j][i].getNumber() + "";
-					if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
-						rule = Rule.ODD_SUM;
-					else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
-						rule = Rule.ODD_PRODUCT;
-					else if(numbers[j][i].getJ() == 2 && numbers[j][i].getI() == 0)
-						rule = Rule.EVEN_SUM;
-					else if(numbers[j][i].getJ() == 3 && numbers[j][i].getI() == 0)
-						rule = Rule.EVEN_PRODUCT;
+		if(readyCount/1000 <= 0)
+			for (int i = 0; i < numbers.length; i++) {
+				for (int j = 0; j < numbers[i].length; j++) {
+					if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
+							&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
+						selectedNumbers.add(numbers[j][i]);
+						numbers[j][i].setSelected(true);
+						
+						operation = numbers[j][i].getNumber() + "";
+						if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
+							rule = Rule.ODD_SUM;
+						else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
+							rule = Rule.ODD_PRODUCT;
+						else if(numbers[j][i].getJ() == 2 && numbers[j][i].getI() == 0)
+							rule = Rule.EVEN_SUM;
+						else if(numbers[j][i].getJ() == 3 && numbers[j][i].getI() == 0)
+							rule = Rule.EVEN_PRODUCT;
+					}
 				}
 			}
-		}
 		
 		return false;
+	}
+	
+	private void addPoints() {
+		
+	}
+	
+	private void compute() {
+		int sum = 0, product = 1;
+		for (Number num : selectedNumbers) {
+			sum += num.getNumber();
+			product *= num.getNumber();
+		}
+		switch(rule) {
+			case ODD_SUM: 
+				if(sum % 2 != 0) {
+					addPoints();
+				}
+				break;
+			case ODD_PRODUCT:
+				if(product % 2 != 0) {
+					addPoints();
+				}
+				break;
+			case EVEN_SUM:
+				if(sum % 2 == 0) {
+					addPoints();
+				}
+				break;
+			case EVEN_PRODUCT:
+				if(product % 2 == 0) {
+					addPoints();
+				}
+				break;
+		}
 	}
 
 	@Override
@@ -302,8 +341,9 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		
 		if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
-			// compute
+			compute();
 		}
+		
 		selectedNumbers.clear();
 		operation = "";
 		
@@ -313,37 +353,51 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		
-		for (int i = 0; i < numbers.length; i++) {
-			for (int j = 0; j < numbers[i].length; j++) {
-				
-				if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
-						&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
-					
-					if(!numbers[j][i].isSelected()){
-						if(selectedNumbers.size() > 0) {
-							Number num = selectedNumbers.get(selectedNumbers.size()-1);
-							
-							if(num.getJ()-1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
-									num.getJ()+1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
-									num.getJ() == numbers[j][i].getJ() && num.getI()-1 == numbers[j][i].getI() ||
-									num.getJ() == numbers[j][i].getJ() && num.getI()+1 == numbers[j][i].getI()) {
-								selectedNumbers.add(numbers[j][i]);
-								numbers[j][i].setSelected(true);
-								
-								if(rule == Rule.EVEN_SUM || rule == Rule.ODD_SUM)
-									operation += " + " + numbers[j][i].getNumber();
-								else
-									operation += " x " + numbers[j][i].getNumber();
-							}
-
-						}
+		if(readyCount/1000 <= 0)
+			if(selectedNumbers.size() < 5)
+				for (int i = 0; i < numbers.length; i++) {
+					for (int j = 0; j < numbers[i].length; j++) {
 						
+						if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
+								&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
+							
+							if(!numbers[j][i].isSelected()){
+								if(selectedNumbers.size() > 0) {
+									Number num = selectedNumbers.get(selectedNumbers.size()-1);
+									
+									if(num.getJ()-1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
+											num.getJ()+1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
+											num.getJ() == numbers[j][i].getJ() && num.getI()-1 == numbers[j][i].getI() ||
+											num.getJ() == numbers[j][i].getJ() && num.getI()+1 == numbers[j][i].getI()) {
+										selectedNumbers.add(numbers[j][i]);
+										numbers[j][i].setSelected(true);
+										
+										if(rule == Rule.EVEN_SUM || rule == Rule.ODD_SUM)
+											operation += " + " + numbers[j][i].getNumber() ;
+										else
+											operation += " x " + numbers[j][i].getNumber();
+									}
+								}
+							}
+						}
 					}
 				}
-			}
-		}
 		
 		return false;
+	}
+	
+	private int getResult() {
+		int sum = 0, product = 1;
+		for (Number num : selectedNumbers) {
+			if(rule == Rule.ODD_SUM || rule == Rule.EVEN_SUM)
+				sum += num.getNumber();
+			else
+				product *= num.getNumber();
+		}
+		
+		if(rule == Rule.ODD_SUM || rule == Rule.EVEN_SUM)
+			return sum;
+		return product;
 	}
 
 	@Override
