@@ -30,7 +30,7 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	public static SpriteBatch spriteBatch;
 	private Texture texture;
-	private Sprite sprite[][], spriteSelected[][];
+	private Sprite sprite[][], spriteSelected[][], spriteWrong[][];
 	//private Sprite sprOddSum, sprOddProduct, sprEvenSum, sprEvenProduct;
 	private OrthographicCamera camera;
 	NumbersGame game;
@@ -123,6 +123,7 @@ public class GameScreen implements Screen, InputProcessor {
 		numbers = new Number[4][4];
 		sprite = new Sprite[4][4];
 		spriteSelected = new Sprite[4][4];
+		spriteWrong = new Sprite[4][4];
 		
 		
 		spriteBatch = new SpriteBatch();
@@ -153,6 +154,7 @@ public class GameScreen implements Screen, InputProcessor {
 				numbers[j][i].setSpriteHeight(spriteSize);
 				numbers[j][i].setLocX(locX + j*spriteSize + j*25);
 				numbers[j][i].setLocY(locY+ i*spriteSize + i*25);
+				
 				sprite[j][i] = new Sprite(texture);
 				sprite[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
 				sprite[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
@@ -160,6 +162,10 @@ public class GameScreen implements Screen, InputProcessor {
 				spriteSelected[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_selected()));
 				spriteSelected[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
 				spriteSelected[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+				
+				spriteWrong[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_wrong()));
+				spriteWrong[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+				spriteWrong[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
 			}
 		}
 		
@@ -227,8 +233,12 @@ public class GameScreen implements Screen, InputProcessor {
 		spriteBatch.begin();
 		for(int i = 0; i < 4; i++)
 			for(int j = 0; j < 4; j++) {
-				if(numbers[j][i].isSelected())
-					spriteSelected[j][i].draw(spriteBatch);
+				if(numbers[j][i].isSelected()) {
+					if(startDelay)
+						spriteWrong[j][i].draw(spriteBatch);
+					else
+						spriteSelected[j][i].draw(spriteBatch);
+				}
 				else
 					sprite[j][i].draw(spriteBatch);
 			}

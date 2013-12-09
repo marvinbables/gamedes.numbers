@@ -1,8 +1,8 @@
 package com.me.numbersgame;
 
 public class Number {
-	String filePath;
-	private String filePath_selected;
+	String filePath, filePath_selected, filePath_wrong;
+
 	int number;
 	private int j; //index
 	private int i; // index
@@ -10,10 +10,11 @@ public class Number {
 	int spriteWidth, spriteHeight;
 	private boolean selected;
 	
-	public Number(int number, String filePath, String filePath_selected) {
+	public Number(int number, String filePath, String filePath_selected, String filePath_wrong) {
 		this.number = number;
 		this.filePath = filePath;
 		this.filePath_selected = filePath_selected;
+		this.filePath_wrong = filePath_wrong;
 		locX = locY = spriteWidth = spriteHeight = 0;
 		setSelected(false);
 	}
@@ -101,5 +102,15 @@ public class Number {
 
 	public void setJ(int j) {
 		this.j = j;
+	}
+
+
+	public String getFilePath_wrong() {
+		return filePath_wrong;
+	}
+
+
+	public void setFilePath_wrong(String filePath_wrong) {
+		this.filePath_wrong = filePath_wrong;
 	}
 }
