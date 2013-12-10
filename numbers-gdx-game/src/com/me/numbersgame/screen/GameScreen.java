@@ -47,6 +47,7 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	boolean correct, startDelay;
 	private int spriteSize;
+	private int score = 0;
 	
 	// location of the numbers
 	int locX = 65, locY = 100;
@@ -278,7 +279,7 @@ public class GameScreen implements Screen, InputProcessor {
 		lblRuleFont.draw(spriteBatch, currentRule(rule), 
 				Gdx.graphics.getWidth()/2 - lblRuleFont.getBounds(currentRule(rule)).width/2, locY + 380);
 		
-		lblScore.draw(spriteBatch, "Score: 2314", locX, locY - 25); // locY - 25
+		lblScore.draw(spriteBatch, "Score: " + score, locX, locY - 25); // locY - 25
 		lblTime.draw(spriteBatch, drawTime, Gdx.graphics.getWidth()/2 - lblTime.getBounds(drawTime).width/2, locY + 430);
 		if(readyCount/1000 > 0)
 			lblCountdown.draw(spriteBatch, (readyCount/1000)+"", 
@@ -376,10 +377,23 @@ public class GameScreen implements Screen, InputProcessor {
 		return false;
 	}
 	
-	private void addPoints() {
+	private void addScore() {
 		
+			
+			if(selectedNumbers.size() == 3){
+				score += 90;
+			}
+			else if(selectedNumbers.size() == 4){
+				score += 160;
+			}
+			else if(selectedNumbers.size() == 5){
+				score += 250;
+			}
 	}
 	
+	private void resetScore(){
+		score = 0;
+	}
 	private boolean checkIfCorrect() {
 		int sum = 0, product = 1;
 		for (Number num : selectedNumbers) {
@@ -413,7 +427,7 @@ public class GameScreen implements Screen, InputProcessor {
 		if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
 			correct = checkIfCorrect(); 
 			if(correct) {
-				addPoints();
+				addScore();
 				correct = false;
 				for (Number num : selectedNumbers)
 					num.setSelected(false);
