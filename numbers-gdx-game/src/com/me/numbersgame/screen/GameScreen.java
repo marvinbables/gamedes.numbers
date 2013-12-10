@@ -177,7 +177,7 @@ public class GameScreen implements Screen, InputProcessor {
 		incorrectDelayTimer = 0;
 		startDelay = false;
 	}
-	
+	// comment comment comment // para ma-commit
 	
 	@Override
 	public void render(float delta) {
