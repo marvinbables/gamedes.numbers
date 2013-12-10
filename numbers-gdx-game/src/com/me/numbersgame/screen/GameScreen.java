@@ -46,6 +46,7 @@ public class GameScreen implements Screen, InputProcessor {
 	String drawTime, operation;
 	
 	boolean correct, startDelay;
+	private int spriteSize;
 	
 	// location of the numbers
 	int locX = 65, locY = 100;
@@ -137,7 +138,7 @@ public class GameScreen implements Screen, InputProcessor {
 		if(texture != null)
 			texture.dispose();
 		
-		int spriteSize = 70;
+		 spriteSize = 70;
 		
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
@@ -179,6 +180,37 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 	// comment comment comment // para ma-commit
 	
+	private void replace(Number num){
+		int i,j;
+		
+		j = num.getJ();
+		i = num.getI();
+		
+			numbers[j][i] = NumberResources.randomNumber();
+			numbers[j][i].setJ(j);
+			numbers[j][i].setI(i);
+			
+			texture = new Texture(numbers[j][i].getFilePath());
+			numbers[j][i].setSpriteWidth(spriteSize);
+			numbers[j][i].setSpriteHeight(spriteSize);
+			numbers[j][i].setLocX(locX + j*spriteSize + j*25);
+			numbers[j][i].setLocY(locY+ i*spriteSize + i*25);
+			
+			sprite[j][i] = new Sprite(texture);
+			sprite[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+			sprite[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+			
+			spriteSelected[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_selected()));
+			spriteSelected[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+			spriteSelected[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+			
+			spriteWrong[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_wrong()));
+			spriteWrong[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+			spriteWrong[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+		
+		
+	}
+	//private void reset
 	@Override
 	public void render(float delta) {
 		update(delta);
@@ -385,9 +417,14 @@ public class GameScreen implements Screen, InputProcessor {
 				correct = false;
 				for (Number num : selectedNumbers)
 					num.setSelected(false);
+				
+				for(int k = 0; k < selectedNumbers.size(); k++){
+					replace(selectedNumbers.get(k));
+				}
 				selectedNumbers.clear();
 				operation = "";
-			}
+				
+				}
 			else {
 				startDelay = true;
 			}
