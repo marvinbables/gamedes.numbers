@@ -185,7 +185,6 @@ public class GameScreen implements Screen, InputProcessor {
 		draw(delta);
 	}
 	
-	
 	private void update(float delta) {
 		readyCount -= elapsedMs;
 		if(readyCount/1000 <= 0) {
