@@ -37,15 +37,20 @@ public class GameScreen implements Screen, InputProcessor {
 	private ArrayList<Number> selectedNumbers = new ArrayList<Number>();
 	private Number numbers[][];
 	
-	private BitmapFont lblRuleFont, lblScore, lblTime, lblCountdown, lblOperation;
+	private BitmapFont lblRuleFont, lblScore, lblTime, lblCountdown, lblOperation, lblMultiplier, lblGameOver;
 	private Rule rule;
 	private Color paleBlue = new Color(.45f, .54f, .73f, 1); // 120, 138, 188, 1; 
 	private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
 	
 	int time, readyCount, elapsedMs = 15, incorrectDelay = 1000, incorrectDelayTimer;
+	int timeCombo;
+	float scoreMultiplier = 1; // for combo 
+	
 	String drawTime, operation;
 	
 	boolean correct, startDelay;
+	private int spriteSize;
+	private int score = 0;
 	
 	// location of the numbers
 	int locX = 65, locY = 100;
@@ -85,6 +90,16 @@ public class GameScreen implements Screen, InputProcessor {
 	    lblOperation.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
 	    lblOperation.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
 	    lblOperation.setColor(paleBlue);
+	    
+	    lblMultiplier = generator.generateFont((int) (30 * SCALE));
+	    lblMultiplier.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblMultiplier.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    lblMultiplier.setColor(paleBlue);
+	    
+	    lblGameOver = generator.generateFont((int) (100 * SCALE));
+	    lblGameOver.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblGameOver.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+	    //lblCountdown.setColor(paleBlue);
 	    
 	    generator.dispose();
 	}
@@ -137,7 +152,7 @@ public class GameScreen implements Screen, InputProcessor {
 		if(texture != null)
 			texture.dispose();
 		
-		int spriteSize = 70;
+		 spriteSize = 70;
 		
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
@@ -170,8 +185,10 @@ public class GameScreen implements Screen, InputProcessor {
 		}
 		
 		time = 60000;
+	//	time = 3000;
 		drawTime = "60:00";
 		readyCount = 4000;
+		timeCombo = 0;
 		operation = "";
 		correct = false;
 		incorrectDelayTimer = 0;
@@ -179,6 +196,37 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 	// comment comment comment // para ma-commit
 	
+	private void replace(Number num){
+		int i,j;
+		
+		j = num.getJ();
+		i = num.getI();
+		
+			numbers[j][i] = NumberResources.randomNumber();
+			numbers[j][i].setJ(j);
+			numbers[j][i].setI(i);
+			
+			texture = new Texture(numbers[j][i].getFilePath());
+			numbers[j][i].setSpriteWidth(spriteSize);
+			numbers[j][i].setSpriteHeight(spriteSize);
+			numbers[j][i].setLocX(locX + j*spriteSize + j*25);
+			numbers[j][i].setLocY(locY+ i*spriteSize + i*25);
+			
+			sprite[j][i] = new Sprite(texture);
+			sprite[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+			sprite[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+			
+			spriteSelected[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_selected()));
+			spriteSelected[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+			spriteSelected[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+			
+			spriteWrong[j][i] = new Sprite(new Texture(numbers[j][i].getFilePath_wrong()));
+			spriteWrong[j][i].flip(false, true); // sprite is flipped along with the camera, so we flip the Y of the sprite
+			spriteWrong[j][i].setBounds(locX + j*spriteSize + j*25, locY+ i*spriteSize + i*25 , spriteSize, spriteSize);
+		
+		
+	}
+	//private void reset
 	@Override
 	public void render(float delta) {
 		update(delta);
@@ -193,6 +241,11 @@ public class GameScreen implements Screen, InputProcessor {
 				time = 0;
 			drawTime = (time/1000) + ":" + (time%1000)/10;
 		}
+		
+		timeCombo -= elapsedMs;
+		
+		if(timeCombo <= 0)
+			scoreMultiplier = 1;
 		// delay if input was incorrect
 		if(startDelay) {
 			incorrectDelayTimer += elapsedMs;
@@ -241,11 +294,12 @@ public class GameScreen implements Screen, InputProcessor {
 				else
 					sprite[j][i].draw(spriteBatch);
 			}
+		lblMultiplier.draw(spriteBatch, "x" + scoreMultiplier, locX, locY - 50);
 		
 		lblRuleFont.draw(spriteBatch, currentRule(rule), 
 				Gdx.graphics.getWidth()/2 - lblRuleFont.getBounds(currentRule(rule)).width/2, locY + 380);
 		
-		lblScore.draw(spriteBatch, "Score: 2314", locX, locY - 25); // locY - 25
+		lblScore.draw(spriteBatch, "Score: " + score, locX, locY - 25); // locY - 25
 		lblTime.draw(spriteBatch, drawTime, Gdx.graphics.getWidth()/2 - lblTime.getBounds(drawTime).width/2, locY + 430);
 		if(readyCount/1000 > 0)
 			lblCountdown.draw(spriteBatch, (readyCount/1000)+"", 
@@ -253,6 +307,10 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		lblOperation.draw(spriteBatch, operation, 
 				Gdx.graphics.getWidth()/2 - lblOperation.getBounds(operation).width/2, locY - 70);
+		
+		if(time == 0)
+			lblGameOver.draw(spriteBatch, "Time's up", locX - 40 , locY + 120);
+		
 		
 		spriteBatch.end();
 	}
@@ -317,36 +375,61 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		//Gdx.app.log("", "x: " + screenX + " ; y: " + screenY);
-		
-		if(readyCount/1000 <= 0 && !startDelay) {
-			for (int i = 0; i < numbers.length; i++) {
-				for (int j = 0; j < numbers[i].length; j++) {
-					if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
-							&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
-						selectedNumbers.add(numbers[j][i]);
-						numbers[j][i].setSelected(true);
-						
-						operation = operationToString();
-						if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
-							rule = Rule.ODD_SUM;
-						else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
-							rule = Rule.ODD_PRODUCT;
-						else if(numbers[j][i].getJ() == 2 && numbers[j][i].getI() == 0)
-							rule = Rule.EVEN_SUM;
-						else if(numbers[j][i].getJ() == 3 && numbers[j][i].getI() == 0)
-							rule = Rule.EVEN_PRODUCT;
+		if(time != 0){
+			if(readyCount/1000 <= 0 && !startDelay) {
+				for (int i = 0; i < numbers.length; i++) {
+					for (int j = 0; j < numbers[i].length; j++) {
+						if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
+								&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
+							selectedNumbers.add(numbers[j][i]);
+							numbers[j][i].setSelected(true);
+							
+							operation = operationToString();
+							if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
+								rule = Rule.ODD_SUM;
+							else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
+								rule = Rule.ODD_PRODUCT;
+							else if(numbers[j][i].getJ() == 2 && numbers[j][i].getI() == 0)
+								rule = Rule.EVEN_SUM;
+							else if(numbers[j][i].getJ() == 3 && numbers[j][i].getI() == 0)
+								rule = Rule.EVEN_PRODUCT;
+						}
 					}
 				}
+				
 			}
-			
 		}
 		return false;
 	}
 	
-	private void addPoints() {
+	private void addScore() {
+		int i = 0;
 		
+		i = selectedNumbers.size();
+		score += i * i * 10 * scoreMultiplier;
+	
+		
+		switch(i){
+		
+		case 3:
+			scoreMultiplier += .25;
+			break;
+		case 4:
+			scoreMultiplier += .5;
+			break;
+		case 5:
+			scoreMultiplier += 1;
+			break;
+			
+	}
+		
+		timeCombo = 3000;
+			
 	}
 	
+	private void resetScore(){
+		score = 0;
+	}
 	private boolean checkIfCorrect() {
 		int sum = 0, product = 1;
 		for (Number num : selectedNumbers) {
@@ -376,29 +459,39 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		
-		if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
-			correct = checkIfCorrect(); 
-			if(correct) {
-				addPoints();
-				correct = false;
-				for (Number num : selectedNumbers)
-					num.setSelected(false);
-				selectedNumbers.clear();
-				operation = "";
+		if(time != 0){
+			
+			if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
+				correct = checkIfCorrect(); 
+				if(correct) {
+					
+					addScore();
+					
+					correct = false;
+					for (Number num : selectedNumbers)
+						num.setSelected(false);
+					
+					for(int k = 0; k < selectedNumbers.size(); k++){
+						replace(selectedNumbers.get(k));
+					}
+					selectedNumbers.clear();
+					operation = "";
+					
+					}
+				else {
+					scoreMultiplier = 1;
+					startDelay = true;
+				}
 			}
-			else {
+			else if(selectedNumbers.size() != 0){
+				scoreMultiplier = 1;
 				startDelay = true;
 			}
-		}
-		else if(selectedNumbers.size() != 0){
-			startDelay = true;
-		}
-		
-		//for (Number num : selectedNumbers)
-		//	num.setSelected(false);
-		
-		
+			
+			//for (Number num : selectedNumbers)
+			//	num.setSelected(false);
+			
+		}	
 		
 		
 		return false;
@@ -406,35 +499,37 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		
-		if(readyCount/1000 <= 0 && !startDelay)
-			if(selectedNumbers.size() < 5)
-				for (int i = 0; i < numbers.length; i++) {
-					for (int j = 0; j < numbers[i].length; j++) {
-						
-						if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
-								&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
+		if(time != 0){
+			
+			if(readyCount/1000 <= 0 && !startDelay)
+				if(selectedNumbers.size() < 5)
+					for (int i = 0; i < numbers.length; i++) {
+						for (int j = 0; j < numbers[i].length; j++) {
 							
-							if(!numbers[j][i].isSelected()){
-								if(selectedNumbers.size() > 0) {
-									Number num = selectedNumbers.get(selectedNumbers.size()-1);
-									
-									if(num.getJ()-1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
-											num.getJ()+1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
-											num.getJ() == numbers[j][i].getJ() && num.getI()-1 == numbers[j][i].getI() ||
-											num.getJ() == numbers[j][i].getJ() && num.getI()+1 == numbers[j][i].getI()) {
-										selectedNumbers.add(numbers[j][i]);
-										numbers[j][i].setSelected(true);
+							if(screenX >= numbers[j][i].getLocX() && screenX <= numbers[j][i].getLocX() + numbers[j][i].getSpriteWidth()
+									&& screenY >= numbers[j][i].getLocY() && screenY <= numbers[j][i].getLocY() + numbers[j][i].getSpriteHeight()) {
+								
+								if(!numbers[j][i].isSelected()){
+									if(selectedNumbers.size() > 0) {
+										Number num = selectedNumbers.get(selectedNumbers.size()-1);
 										
-										operation = operationToString();
+										if(num.getJ()-1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
+												num.getJ()+1 == numbers[j][i].getJ() && num.getI() == numbers[j][i].getI() ||
+												num.getJ() == numbers[j][i].getJ() && num.getI()-1 == numbers[j][i].getI() ||
+												num.getJ() == numbers[j][i].getJ() && num.getI()+1 == numbers[j][i].getI()) {
+											selectedNumbers.add(numbers[j][i]);
+											numbers[j][i].setSelected(true);
+											
+											operation = operationToString();
+										}
 									}
 								}
 							}
 						}
 					}
-				}
+		}	
+			return false;
 		
-		return false;
 	}
 	
 	private String operationToString() {
