@@ -3,11 +3,7 @@ package com.me.numbersgame.screen;
 import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
-import aurelienribon.tweenengine.TweenEquation;
-import aurelienribon.tweenengine.TweenEquations;
-import aurelienribon.tweenengine.TweenManager;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -64,6 +60,8 @@ public class Splash implements Screen {
 			@Override
 			public void onEvent(int type, BaseTween<?> source) {
 				game.setScreen(game.getMainMenuScreen());
+				//NumbersGame.tweenManager.killTarget(spriteSplash);
+				NumbersGame.tweenManager.killAll();
 			}
 		}).start(NumbersGame.tweenManager);
 	}

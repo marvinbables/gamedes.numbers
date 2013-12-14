@@ -5,13 +5,11 @@
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/numbers-gdx-game"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="lib" path="/numbers-gdx-game/libs/gdx.jar" sourcepath="/numbers-gdx-game/libs/gdx-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/numbers-gdx-game/libs/bodyeditor-loader.jar" sourcepath="/numbers-gdx-game/libs/bodyeditor-loader-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/numbers-gdx-game/libs/tween-engine-api.jar" sourcepath="/numbers-gdx-game/libs/tween-engine-api-sources.jar"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry kind="lib" path="libs/bodyeditor-loader.jar"/>
-	<classpathentry kind="lib" path="libs/gdx-backend-android-sources.jar"/>
+	<classpathentry kind="lib" path="/numbers-gdx-game/libs/gdx-freetype.jar"/>
 	<classpathentry kind="lib" path="libs/gdx-backend-android.jar"/>
-	<classpathentry kind="lib" path="libs/gdx-freetype-natives.jar"/>
-	<classpathentry kind="lib" path="libs/gdx-freetype.jar"/>
-	<classpathentry kind="lib" path="libs/gdx.jar"/>
-	<classpathentry kind="lib" path="libs/tween-engine-api.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

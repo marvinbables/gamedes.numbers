@@ -3,10 +3,6 @@ package com.me.numbersgame.screen;
 import java.util.ArrayList;
 import java.util.Random;
 
-import aurelienribon.tweenengine.Tween;
-import aurelienribon.tweenengine.TweenEquation;
-import aurelienribon.tweenengine.TweenEquations;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
@@ -19,11 +15,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.me.numbersgame.Number;
 import com.me.numbersgame.NumberResources;
 import com.me.numbersgame.NumbersGame;
-import com.me.numbersgame.tween.SpriteAccessor;
 
 public class GameScreen implements Screen, InputProcessor {
 	
@@ -50,7 +44,7 @@ public class GameScreen implements Screen, InputProcessor {
 	//private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
 	
 	int time, readyCount, elapsedMs = 16, incorrectDelay = 1000, incorrectDelayTimer;
-	int timeCombo, TIME_LIMIT = 3000, oneTime = 0;
+	int timeCombo, TIME_LIMIT = 1000, oneTime = 0;
 	float scoreMultiplier = 1; // for combo 
 	
 	String drawTime, operation;
@@ -194,7 +188,7 @@ public class GameScreen implements Screen, InputProcessor {
 		//time = 60000;
 		time = TIME_LIMIT;
 		drawTime = time/1000 + ":00";
-		readyCount = 4000;
+		readyCount = 2000; // 4000
 		timeCombo = 0;
 		oneTime = 0;
 		operation = "";
@@ -236,7 +230,7 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		
 	}
-	//private void reset
+	
 	@Override
 	public void render(float delta) {
 		long time = System.currentTimeMillis();
@@ -332,15 +326,6 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		if(time == 0) {
 			lblGameOver.draw(spriteBatch, "Time's up", locX - 40 , locY + 120);
-			
-			oneTime++; // test
-			if(oneTime == 1) {
-				Tween.set(sprite[0][0], SpriteAccessor.POS_XY).target(sprite[0][0].getX(), sprite[0][0].getY())
-					.start(NumbersGame.tweenManager);
-				Tween.to(sprite[0][0], SpriteAccessor.POS_XY, 2).target(30, 30)
-					.start(NumbersGame.tweenManager);
-				
-			}
 		}
 		
 		spriteBatch.end();
