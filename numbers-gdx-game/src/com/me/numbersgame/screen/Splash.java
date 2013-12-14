@@ -3,6 +3,8 @@ package com.me.numbersgame.screen;
 import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
+import aurelienribon.tweenengine.TweenEquation;
+import aurelienribon.tweenengine.TweenEquations;
 import aurelienribon.tweenengine.TweenManager;
 
 import com.badlogic.gdx.Game;
@@ -19,7 +21,6 @@ public class Splash implements Screen {
 	
 	private SpriteBatch batch;
 	private Sprite spriteSplash;
-	private TweenManager tweenManager;
 	NumbersGame game;
 	
 	public Splash(NumbersGame game) {
@@ -31,7 +32,7 @@ public class Splash implements Screen {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		tweenManager.update(delta);
+		NumbersGame.tweenManager.update(delta);
 		
 		GameScreen.spriteBatch.begin();
 		spriteSplash.draw(GameScreen.spriteBatch);
@@ -46,7 +47,6 @@ public class Splash implements Screen {
 
 	@Override
 	public void show() {
-		tweenManager = new TweenManager();
 		Tween.registerAccessor(Sprite.class, new SpriteAccessor());
 		
 		Texture splashTexture = new Texture("img/tsaa_splash.png");
@@ -55,15 +55,17 @@ public class Splash implements Screen {
 		// sprite is flipped along with the camera, so we flip the Y of the sprite
 		spriteSplash.flip(false, true);
 		
-		Tween.set(spriteSplash, 0).target(0).start(tweenManager);
+		Tween.set(spriteSplash, 0).target(0).start(NumbersGame.tweenManager);
 		// previous duration 2
+		//Tween.to(spriteSplash, 0, 2f).target(1).ease(TweenEquations.easeOutBounce);
+		
 		Tween.to(spriteSplash, 0, 0.1f).target(1).repeatYoyo(1, 0.1f).setCallback(new TweenCallback() {
 			
 			@Override
 			public void onEvent(int type, BaseTween<?> source) {
 				game.setScreen(game.getMainMenuScreen());
 			}
-		}).start(tweenManager);		
+		}).start(NumbersGame.tweenManager);
 	}
 
 	@Override

@@ -4,8 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/bodyeditor-loader-sources.jar"/>
 	<classpathentry kind="lib" path="libs/bodyeditor-loader.jar"/>
-	<classpathentry kind="lib" path="libs/gdx-backend-android-sources.jar"/>
-	<classpathentry kind="lib" path="libs/gdx-backend-android.jar"/>
 	<classpathentry kind="lib" path="libs/gdx-freetype-natives.jar"/>
 	<classpathentry kind="lib" path="libs/gdx-freetype.jar"/>
 	<classpathentry kind="lib" path="libs/gdx-sources.jar"/>

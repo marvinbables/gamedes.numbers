@@ -1,6 +1,11 @@
 package com.me.numbersgame.screen;
 
 import java.util.ArrayList;
+import java.util.Random;
+
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenEquation;
+import aurelienribon.tweenengine.TweenEquations;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -14,9 +19,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.me.numbersgame.Number;
 import com.me.numbersgame.NumberResources;
 import com.me.numbersgame.NumbersGame;
+import com.me.numbersgame.tween.SpriteAccessor;
 
 public class GameScreen implements Screen, InputProcessor {
 	
@@ -40,10 +47,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private BitmapFont lblRuleFont, lblScore, lblTime, lblCountdown, lblOperation, lblMultiplier, lblGameOver;
 	private Rule rule;
 	private Color paleBlue = new Color(.45f, .54f, .73f, 1); // 120, 138, 188, 1; 
-	private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
+	//private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
 	
-	int time, readyCount, elapsedMs = 15, incorrectDelay = 1000, incorrectDelayTimer;
-	int timeCombo;
+	int time, readyCount, elapsedMs = 16, incorrectDelay = 1000, incorrectDelayTimer;
+	int timeCombo, TIME_LIMIT = 3000, oneTime = 0;
 	float scoreMultiplier = 1; // for combo 
 	
 	String drawTime, operation;
@@ -184,15 +191,18 @@ public class GameScreen implements Screen, InputProcessor {
 			}
 		}
 		
-		time = 60000;
-	//	time = 3000;
-		drawTime = "60:00";
+		//time = 60000;
+		time = TIME_LIMIT;
+		drawTime = time/1000 + ":00";
 		readyCount = 4000;
 		timeCombo = 0;
+		oneTime = 0;
 		operation = "";
 		correct = false;
 		incorrectDelayTimer = 0;
 		startDelay = false;
+		rule = Rule.ODD_SUM;
+		resetScore();
 	}
 	// comment comment comment // para ma-commit
 	
@@ -229,8 +239,19 @@ public class GameScreen implements Screen, InputProcessor {
 	//private void reset
 	@Override
 	public void render(float delta) {
+		long time = System.currentTimeMillis();
 		update(delta);
 		draw(delta);
+		
+		time = (1000 / 60) - (System.currentTimeMillis() - time);
+		
+		if(time > 0) {
+			try {
+				Thread.sleep(time);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private void update(float delta) {
@@ -288,11 +309,12 @@ public class GameScreen implements Screen, InputProcessor {
 				if(numbers[j][i].isSelected()) {
 					if(startDelay)
 						spriteWrong[j][i].draw(spriteBatch);
-					else
+					else 
 						spriteSelected[j][i].draw(spriteBatch);
 				}
-				else
-					sprite[j][i].draw(spriteBatch);
+				else {
+						sprite[j][i].draw(spriteBatch);
+				}
 			}
 		lblMultiplier.draw(spriteBatch, "x" + scoreMultiplier, locX, locY - 50);
 		
@@ -308,9 +330,18 @@ public class GameScreen implements Screen, InputProcessor {
 		lblOperation.draw(spriteBatch, operation, 
 				Gdx.graphics.getWidth()/2 - lblOperation.getBounds(operation).width/2, locY - 70);
 		
-		if(time == 0)
+		if(time == 0) {
 			lblGameOver.draw(spriteBatch, "Time's up", locX - 40 , locY + 120);
-		
+			
+			oneTime++; // test
+			if(oneTime == 1) {
+				Tween.set(sprite[0][0], SpriteAccessor.POS_XY).target(sprite[0][0].getX(), sprite[0][0].getY())
+					.start(NumbersGame.tweenManager);
+				Tween.to(sprite[0][0], SpriteAccessor.POS_XY, 2).target(30, 30)
+					.start(NumbersGame.tweenManager);
+				
+			}
+		}
 		
 		spriteBatch.end();
 	}
@@ -385,14 +416,7 @@ public class GameScreen implements Screen, InputProcessor {
 							numbers[j][i].setSelected(true);
 							
 							operation = operationToString();
-							if(numbers[j][i].getJ() == 0 && numbers[j][i].getI() == 0)
-								rule = Rule.ODD_SUM;
-							else if(numbers[j][i].getJ() == 1 && numbers[j][i].getI() == 0)
-								rule = Rule.ODD_PRODUCT;
-							else if(numbers[j][i].getJ() == 2 && numbers[j][i].getI() == 0)
-								rule = Rule.EVEN_SUM;
-							else if(numbers[j][i].getJ() == 3 && numbers[j][i].getI() == 0)
-								rule = Rule.EVEN_PRODUCT;
+							
 						}
 					}
 				}
@@ -430,6 +454,7 @@ public class GameScreen implements Screen, InputProcessor {
 	private void resetScore(){
 		score = 0;
 	}
+	
 	private boolean checkIfCorrect() {
 		int sum = 0, product = 1;
 		for (Number num : selectedNumbers) {
@@ -457,6 +482,16 @@ public class GameScreen implements Screen, InputProcessor {
 		return false;
 	}
 
+	private void randomizeRule() {
+		Random rand = new Random();
+		switch(rand.nextInt(4)) {
+			case 0: rule = Rule.ODD_SUM; break;
+			case 1: rule = Rule.ODD_PRODUCT; break;
+			case 2: rule = Rule.EVEN_SUM; break;
+			case 3: rule = Rule.EVEN_PRODUCT; break;
+		}
+	}
+	
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if(time != 0){
@@ -466,7 +501,7 @@ public class GameScreen implements Screen, InputProcessor {
 				if(correct) {
 					
 					addScore();
-					
+					randomizeRule();
 					correct = false;
 					for (Number num : selectedNumbers)
 						num.setSelected(false);
