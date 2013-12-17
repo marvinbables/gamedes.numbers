@@ -43,6 +43,7 @@ public class Splash implements Screen {
 
 	@Override
 	public void show() {
+		Tween.setCombinedAttributesLimit(2);
 		Tween.registerAccessor(Sprite.class, new SpriteAccessor());
 		
 		Texture splashTexture = new Texture("img/tsaa_splash.png");
@@ -50,12 +51,12 @@ public class Splash implements Screen {
 		spriteSplash.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		// sprite is flipped along with the camera, so we flip the Y of the sprite
 		spriteSplash.flip(false, true);
-		
-		Tween.set(spriteSplash, 0).target(0).start(NumbersGame.tweenManager);
+
+		Tween.set(spriteSplash, SpriteAccessor.ALPHA).target(0).start(NumbersGame.tweenManager);
 		// previous duration 2
 		//Tween.to(spriteSplash, 0, 2f).target(1).ease(TweenEquations.easeOutBounce);
 		
-		Tween.to(spriteSplash, 0, 0.1f).target(1).repeatYoyo(1, 0.1f).setCallback(new TweenCallback() {
+		Tween.to(spriteSplash, SpriteAccessor.ALPHA, 0.1f).target(1).repeatYoyo(1, 0.1f).setCallback(new TweenCallback() {
 			
 			@Override
 			public void onEvent(int type, BaseTween<?> source) {

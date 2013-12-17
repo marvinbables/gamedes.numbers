@@ -3,6 +3,11 @@ package com.me.numbersgame.screen;
 import java.util.ArrayList;
 import java.util.Random;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
+import aurelienribon.tweenengine.TweenEquation;
+import aurelienribon.tweenengine.TweenEquations;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
@@ -18,6 +23,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.me.numbersgame.Number;
 import com.me.numbersgame.NumberResources;
 import com.me.numbersgame.NumbersGame;
+import com.me.numbersgame.tween.SpriteAccessor;
 
 public class GameScreen implements Screen, InputProcessor {
 	
@@ -44,7 +50,7 @@ public class GameScreen implements Screen, InputProcessor {
 	//private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
 	
 	int time, readyCount, elapsedMs = 16, incorrectDelay = 1000, incorrectDelayTimer;
-	int timeCombo, TIME_LIMIT = 1000, oneTime = 0;
+	int timeCombo, TIME_LIMIT = 60000, oneTime = 0;
 	float scoreMultiplier = 1; // for combo 
 	
 	String drawTime, operation;
@@ -310,7 +316,7 @@ public class GameScreen implements Screen, InputProcessor {
 						sprite[j][i].draw(spriteBatch);
 				}
 			}
-		lblMultiplier.draw(spriteBatch, "x" + scoreMultiplier, locX, locY - 50);
+		//lblMultiplier.draw(spriteBatch, "x" + scoreMultiplier, locX, locY - 50);
 		
 		lblRuleFont.draw(spriteBatch, currentRule(rule), 
 				Gdx.graphics.getWidth()/2 - lblRuleFont.getBounds(currentRule(rule)).width/2, locY + 380);
@@ -326,6 +332,15 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		if(time == 0) {
 			lblGameOver.draw(spriteBatch, "Time's up", locX - 40 , locY + 120);
+			oneTime++; // test
+			if(oneTime == 1) {
+				//Tween.set(sprite[0][0], SpriteAccessor.POS_XY).target(0).start(NumbersGame.tweenManager);
+				Tween.to(sprite[0][0], SpriteAccessor.POS_XY, 2f)
+				.target(150, 150)
+				.ease(TweenEquations.easeInCubic)
+				.start(NumbersGame.tweenManager);
+				//System.out.println("Tweening!");
+			}
 		}
 		
 		spriteBatch.end();
@@ -349,6 +364,8 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public void show() {
 		Gdx.input.setInputProcessor(this);
+		//Tween.set(sprite[0][0], SpriteAccessor.ALPHA).target(0).start(NumbersGame.tweenManager);
+		//Tween.to(sprite[0][0], SpriteAccessor.ALPHA, 2f).target(1).start(NumbersGame.tweenManager);
 		initialize();
 	}
 
@@ -484,7 +501,7 @@ public class GameScreen implements Screen, InputProcessor {
 			if(selectedNumbers.size() >= 3 && selectedNumbers.size() <= 5) {
 				correct = checkIfCorrect(); 
 				if(correct) {
-					
+					NumberResources.correct.play(1);
 					addScore();
 					randomizeRule();
 					correct = false;
@@ -501,6 +518,8 @@ public class GameScreen implements Screen, InputProcessor {
 				else {
 					scoreMultiplier = 1;
 					startDelay = true;
+					long id = NumberResources.wrong.play(1);
+					//NumberResources.wrong.stop(id);
 				}
 			}
 			else if(selectedNumbers.size() != 0){

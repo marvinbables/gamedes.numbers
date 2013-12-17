@@ -1,6 +1,9 @@
 package com.me.numbersgame;
 
 import java.util.Random;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.me.numbersgame.Number;
 
 public class NumberResources {
@@ -41,6 +44,9 @@ public class NumberResources {
 	public static final String oddProduct = "img/oddProduct.png";
 	public static final String evenSum = "img/evenSum.png";
 	public static final String evenProduct = "img/evenProduct.png";
+	
+	public static final Sound wrong = Gdx.audio.newSound(Gdx.files.internal("sound/TNT.WAV"));
+	public static final Sound correct = Gdx.audio.newSound(Gdx.files.internal("sound/Crystal.WAV"));
 	
 	public static Number randomNumber() {
 		Random rand = new Random();

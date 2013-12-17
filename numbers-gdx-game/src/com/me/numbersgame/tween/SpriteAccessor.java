@@ -20,7 +20,6 @@ public class SpriteAccessor implements TweenAccessor<Sprite>{
 				returnValues[1] = target.getY();
 				return 2;
 			default:
-				assert false;
 				return -1;
 		}
 	}
@@ -32,11 +31,13 @@ public class SpriteAccessor implements TweenAccessor<Sprite>{
 				target.setColor(target.getColor().r, target.getColor().g, target.getColor().b, newValues[0]);
 				break;
 			case POS_XY:
-				//target.setPosition(newValues[0], newValues[1]);
+				System.out.println("Setting position of " + target);
+//				target.setPosition(newValues[0], newValues[1]);
 				target.setX(newValues[0]);
 				target.setY(newValues[1]);
+				break;
 			default:
-				assert false;
+				break;
 		}
 	}
 
