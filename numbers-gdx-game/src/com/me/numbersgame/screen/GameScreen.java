@@ -37,20 +37,20 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	public static SpriteBatch spriteBatch;
 	private Texture texture;
-	private Sprite sprite[][], spriteSelected[][], spriteWrong[][];
+	private Sprite sprite[][], spriteSelected[][], spriteWrong[][], spriteTimeupBg;
 	//private Sprite sprOddSum, sprOddProduct, sprEvenSum, sprEvenProduct;
 	private OrthographicCamera camera;
 	NumbersGame game;
 	private ArrayList<Number> selectedNumbers = new ArrayList<Number>();
 	private Number numbers[][];
 	
-	private BitmapFont lblRuleFont, lblScore, lblTime, lblCountdown, lblOperation, lblMultiplier, lblGameOver;
+	private BitmapFont lblRuleFont, lblScore, lblTime, lblCountdown, lblOperation, lblMultiplier, lblGameOver, lblScoreTimeup;
 	private Rule rule;
 	private Color paleBlue = new Color(.45f, .54f, .73f, 1); // 120, 138, 188, 1; 
 	//private Color royalBlue1 = new Color(.28f, .46f, 1f, 1); // 72 118 255
 	
 	int time, readyCount, elapsedMs = 16, incorrectDelay = 1000, incorrectDelayTimer;
-	int timeCombo, TIME_LIMIT = 60000, oneTime = 0;
+	int timeCombo, TIME_LIMIT = 1000, oneTime = 0;
 	float scoreMultiplier = 1; // for combo 
 	
 	String drawTime, operation;
@@ -59,8 +59,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private int spriteSize;
 	private int score = 0;
 	
+	private boolean doneTimeupBG;
 	// location of the numbers
 	int locX = 65, locY = 100;
+	int timeupBGx = -40;
 	
 	public void loadFont() {
 		SCALE = 1.0f * Gdx.graphics.getWidth() / VIRTUAL_WIDTH ;
@@ -82,6 +84,10 @@ public class GameScreen implements Screen, InputProcessor {
 	    lblScore.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
 	    lblScore.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
 	    //lblScore.setColor(royalBlue1);
+	    
+	    lblScoreTimeup = generator.generateFont((int) (20 * SCALE));
+	    lblScoreTimeup.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
+	    lblScoreTimeup.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
 	    
 	    lblTime = generator.generateFont((int) (30 * SCALE));
 	    lblTime.setScale((float) (1.0 / SCALE), (float) (-1.0 / SCALE));
@@ -146,7 +152,8 @@ public class GameScreen implements Screen, InputProcessor {
 		sprite = new Sprite[4][4];
 		spriteSelected = new Sprite[4][4];
 		spriteWrong = new Sprite[4][4];
-		
+		spriteTimeupBg = new Sprite(new Texture(Gdx.files.internal(NumberResources.timeupBG)));
+		spriteTimeupBg.setBounds(locX - 60, timeupBGx, 460, 120);
 		
 		spriteBatch = new SpriteBatch();
 		// sprite batch will use the camera
@@ -194,7 +201,7 @@ public class GameScreen implements Screen, InputProcessor {
 		//time = 60000;
 		time = TIME_LIMIT;
 		drawTime = time/1000 + ":00";
-		readyCount = 2000; // 4000
+		readyCount = 4000; // 4000
 		timeCombo = 0;
 		oneTime = 0;
 		operation = "";
@@ -203,6 +210,8 @@ public class GameScreen implements Screen, InputProcessor {
 		startDelay = false;
 		rule = Rule.ODD_SUM;
 		resetScore();
+		doneTimeupBG = false;
+		timeupBGx = -100;
 	}
 	// comment comment comment // para ma-commit
 	
@@ -316,7 +325,7 @@ public class GameScreen implements Screen, InputProcessor {
 						sprite[j][i].draw(spriteBatch);
 				}
 			}
-		//lblMultiplier.draw(spriteBatch, "x" + scoreMultiplier, locX, locY - 50);
+		lblMultiplier.draw(spriteBatch, "x" + scoreMultiplier, locX, locY - 50);
 		
 		lblRuleFont.draw(spriteBatch, currentRule(rule), 
 				Gdx.graphics.getWidth()/2 - lblRuleFont.getBounds(currentRule(rule)).width/2, locY + 380);
@@ -330,15 +339,27 @@ public class GameScreen implements Screen, InputProcessor {
 		lblOperation.draw(spriteBatch, operation, 
 				Gdx.graphics.getWidth()/2 - lblOperation.getBounds(operation).width/2, locY - 70);
 		
+		
 		if(time == 0) {
-			lblGameOver.draw(spriteBatch, "Time's up", locX - 40 , locY + 120);
+			
+			spriteTimeupBg.draw(spriteBatch);
+			if(timeupBGx < locY + 100) {
+				timeupBGx += 10;
+				spriteTimeupBg.setY(timeupBGx);
+			}
+			else {
+				doneTimeupBG = true;
+			}
+			
+			if(doneTimeupBG)
+				lblGameOver.draw(spriteBatch, "Time's up", locX - 40 , locY + 120);
+			
+			
 			oneTime++; // test
 			if(oneTime == 1) {
+				NumberResources.time.play(1);
 				//Tween.set(sprite[0][0], SpriteAccessor.POS_XY).target(0).start(NumbersGame.tweenManager);
-				Tween.to(sprite[0][0], SpriteAccessor.POS_XY, 2f)
-				.target(150, 150)
-				.ease(TweenEquations.easeInCubic)
-				.start(NumbersGame.tweenManager);
+//				Tween.to(sprite[0][0], SpriteAccessor.POS_XY, 2f).target(150, 150).ease(TweenEquations.easeInCubic).start(NumbersGame.tweenManager);
 				//System.out.println("Tweening!");
 			}
 		}
@@ -486,11 +507,11 @@ public class GameScreen implements Screen, InputProcessor {
 
 	private void randomizeRule() {
 		Random rand = new Random();
-		switch(rand.nextInt(4)) {
+		switch(rand.nextInt(3)) {
 			case 0: rule = Rule.ODD_SUM; break;
-			case 1: rule = Rule.ODD_PRODUCT; break;
+			case 1: rule = Rule.EVEN_PRODUCT; break;
 			case 2: rule = Rule.EVEN_SUM; break;
-			case 3: rule = Rule.EVEN_PRODUCT; break;
+			//case 3: rule = Rule.EVEN_PRODUCT; break;
 		}
 	}
 	
@@ -518,7 +539,7 @@ public class GameScreen implements Screen, InputProcessor {
 				else {
 					scoreMultiplier = 1;
 					startDelay = true;
-					long id = NumberResources.wrong.play(1);
+					NumberResources.wrong.play(1);
 					//NumberResources.wrong.stop(id);
 				}
 			}
@@ -582,8 +603,8 @@ public class GameScreen implements Screen, InputProcessor {
 				operation += ((i == 0)? "" : " x ") + num.getNumber();
 		}
 		
-		if(selectedNumbers.size() > 1)
-			operation += " = " + getResult();
+		//if(selectedNumbers.size() > 1)
+		//	operation += " = " + getResult();
 			
 		return operation;
 	}

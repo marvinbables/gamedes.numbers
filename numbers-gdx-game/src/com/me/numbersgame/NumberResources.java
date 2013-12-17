@@ -40,13 +40,16 @@ public class NumberResources {
 	public static final String eightWrong = "img/eight_wrong.png";
 	public static final String nineWrong = "img/nine_wrong.png";
 	
+	public static final String timeupBG = "img/timeupBG.png";
+	
 	public static final String oddSum = "img/oddSum.png";
 	public static final String oddProduct = "img/oddProduct.png";
 	public static final String evenSum = "img/evenSum.png";
 	public static final String evenProduct = "img/evenProduct.png";
 	
 	public static final Sound wrong = Gdx.audio.newSound(Gdx.files.internal("sound/TNT.WAV"));
-	public static final Sound correct = Gdx.audio.newSound(Gdx.files.internal("sound/Crystal.WAV"));
+	public static final Sound correct = Gdx.audio.newSound(Gdx.files.internal("sound/09_ch_levelup.wav"));
+	public static final Sound time = Gdx.audio.newSound(Gdx.files.internal("sound/Akuaku.WAV"));
 	
 	public static Number randomNumber() {
 		Random rand = new Random();
