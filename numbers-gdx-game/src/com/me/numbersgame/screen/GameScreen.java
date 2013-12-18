@@ -603,7 +603,7 @@ public class GameScreen implements Screen, InputProcessor {
 				operation += ((i == 0)? "" : " x ") + num.getNumber();
 		}
 		
-		//if(selectedNumbers.size() > 1)
+	//	if(selectedNumbers.size() > 1)
 		//	operation += " = " + getResult();
 			
 		return operation;
